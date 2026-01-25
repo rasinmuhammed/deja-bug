@@ -51,7 +51,7 @@
         "title": "Deja-Bug: Search Past Bugs"
       },
       {
-        "command": "deja-bug.manualCapture",
+        "command": "deja-bug.captureManual",
         "title": "Deja-Bug: Capture This Bug"
       },
       {

@@ -4,6 +4,7 @@ Version: 0.1.0
 Summary: MCP server for Deja-Bug VS Code extension
 Requires-Python: >=3.11
 Requires-Dist: fastmcp>=0.2.0
+Requires-Dist: aiohttp>=3.9.0
 Requires-Dist: pydantic>=2.6.0
 Requires-Dist: ollama>=0.1.6
 Requires-Dist: lancedb>=0.5.0

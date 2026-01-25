@@ -206,21 +206,19 @@ export class TerminalMonitor implements vscode.Disposable {
             });
 
             if (result?.status === 'captured') {
-                this.log(`✓ Bug captured! Confidence: ${(result.confidence * 100).toFixed(0)}%, Time to fix: ${timeToFixSec}s`);
-
+                this.log(`🎉 Bug ${result.bug_id} captured!`);
+                
+                // Trigger LLM analysis
+                this.analyzeBugWithLLM(result.bug_id, state, result.git_diff || '');
+                
                 vscode.window.showInformationMessage(
-                    `🐛 Bug fixed and captured! (${(result.confidence * 100).toFixed(0)}% confidence, ${timeToFixSec}s to fix)`,
-                    'View'
+                    `✅ Bug captured! Analyzing with AI...`,
+                    'View Analysis'
                 ).then(selection => {
-                    if (selection === 'View') {
-                        // Open the bug markdown file
-                        const bugPath = `${workspaceFolder.uri.fsPath}/.deja-bug/bugs/${result.bug_id}.md`;
-                        vscode.workspace.openTextDocument(bugPath).then(doc => {
-                            vscode.window.showTextDocument(doc);
-                        });
+                    if (selection === 'View Analysis') {
+                        // Will show analysis when ready
                     }
                 });
-
                 state.activeIncident = null;
                 state.incidentStartTime = null;
             } else {
@@ -292,6 +290,65 @@ export class TerminalMonitor implements vscode.Disposable {
         this.log(`Terminal closed: ${terminal.name}`);
     }
 
+    private async analyzeBugWithLLM(
+        bugId: string,
+        state: TerminalState,
+        gitDiff: string
+    ): Promise<void> {
+        try {
+            this.log(`🧠 Triggering LLM analysis for ${bugId}...`);
+            
+            const errorLog = state.buffer.getAll();
+            const timeToFix = state.incidentStartTime 
+                ? Math.floor((Date.now() - state.incidentStartTime) / 1000)
+                : 0;
+            
+            // Call analyze_bug tool
+            const analysis = await this.mcpClient.callTool('analyze_bug', {
+                bug_id: bugId,
+                error_log: errorLog,
+                git_diff: gitDiff,
+                time_to_fix: timeToFix,
+                modified_files: [] //TODO: Extract from git diff
+            });
+            
+            if (analysis?.status === 'analyzed') {
+                const summary = analysis.summary;
+                this.log(`✅ AI Analysis complete: ${summary.root_cause?.substring(0, 50)}...`);
+                
+                // Show rich notification with summary
+                vscode.window.showInformationMessage(
+                    `🧠 ${summary.root_cause?.substring(0, 80)}...`,
+                    'View Full Report', 'Search Similar'
+                ).then(selection => {
+                    if (selection === 'Search Similar') {
+                        this.searchSimilarBugs(summary.root_cause);
+                    }
+                });
+            }
+        } catch (error) {
+            this.log(`❌ Error analyzing bug: ${error}`);
+        }
+    }
+    
+    private async searchSimilarBugs(query: string): Promise<void> {
+        try {
+            const results = await this.mcpClient.callTool('search_similar_bugs', {
+                query,
+                k: 5
+            });
+            
+            if (results?.results && results.results.length > 0) {
+                this.log(`🔍 Found ${results.count} similar bugs`);
+                // TODO: Show in webview
+            } else {
+                vscode.window.showInformationMessage('No similar bugs found');
+            }
+        } catch (error) {
+            this.log(`❌ Error searching bugs: ${error}`);
+        }
+    }
+
     private log(message: string): void {
         const timestamp = new Date().toISOString();
         this.outputChannel.appendLine(`[${timestamp}] ${message}`);
@@ -299,7 +356,6 @@ export class TerminalMonitor implements vscode.Disposable {
 
     dispose(): void {
         this.disposables.forEach(d => d.dispose());
-        this.terminalStates.clear();
         this.outputChannel.dispose();
     }
 }

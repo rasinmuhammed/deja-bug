@@ -11,12 +11,23 @@ from typing import Dict, Any, Optional
 from fastmcp import FastMCP
 from pydantic import BaseModel, Field
 
+from .llm import OllamaClient
+from .storage import BugVectorStore
+
 # Initialize MCP server
 mcp = FastMCP("deja-bug")
+
+# Initialize LLM and vector store
+ollama_client = OllamaClient()
+vector_store = BugVectorStore()
 
 # In-memory storage for active incidents (will be replaced with proper storage)
 active_incidents: Dict[str, Dict[str, Any]] = {}
 incident_counter = 0
+
+# Register LLM tools
+from . import llm_tools
+llm_tools.init_tools(mcp, ollama_client, vector_store, active_incidents, lambda msg: print(f"[MCP] {msg}", file=sys.stderr))
 
 
 class IncidentCapture(BaseModel):
