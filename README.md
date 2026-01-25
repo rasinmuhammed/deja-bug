@@ -1,23 +1,60 @@
 # Deja-Bug
 
-**Stop teaching AI the same lessons twice.**
+<p align="center">
+  <img src="extension/assets/icon.png" alt="Deja-Bug Logo" width="128" height="128">
+</p>
 
-Deja-Bug is an agentic AI-powered VS Code extension that automatically captures every debugging session, links errors to fixes using intelligent heuristics, and builds a searchable knowledge graph. Your bugs become training data for your AI coding assistant.
+<h1 align="center">Deja-Bug 🐛✨</h1>
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![VS Code](https://img.shields.io/badge/VS%20Code-1.85%2B-blue)
-![Python](https://img.shields.io/badge/Python-3.11%2B-blue)
+<p align="center">
+  <strong>Turn your debugging sessions into AI-powered learning</strong>
+</p>
+
+<p align="center">
+  Automatically capture bugs, analyze with local LLM, and build a searchable knowledge base—100% private
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Phase%203-Complete-success" alt="Phase 3">
+  <img src="https://img.shields.io/badge/AI-Ollama%20Powered-blue" alt="AI Powered">
+  <img src="https://img.shields.io/badge/Privacy-100%25%20Local-green" alt="Privacy">
+  <a href="https://github.com/rasinmuhammed/deja-bug/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"></a>
+  <a href="https://github.com/rasinmuhammed/deja-bug"><img src="https://img.shields.io/github/stars/rasinmuhammed/deja-bug?style=social" alt="GitHub Stars"></a>
+</p>
+
+---
+
+## 🎯 What Makes Deja-Bug Different?
+
+**Traditional Logging:** You fix a bug. Tomorrow you forget how.  
+**Deja-Bug:** AI analyzes your fix, stores it semantically, reminds you next time.
+
+**🧠 Local LLM Analysis** • **🔍 Semantic Search** • **📝 Auto Reports** • **🔐 100% Private**
 
 ---
 
 ## ✨ Features
 
-- **Zero-Touch Capture**: Automatically log terminal errors and successful fixes without interrupting flow
-- **Intelligent Linking**: Match errors to fixes using git diffs and stack trace analysis
-- **Semantic Search**: Find past solutions using AI-powered similarity search
-- **Local-First Privacy**: All processing happens on your machine—no cloud, no telemetry
-- **AI Agent Integration**: Export your debugging history as context for Cursor, Copilot, and other AI tools
-- **Deja-Bug Wrapped**: Beautiful yearly summary of your debugging journey (coming soon)
+### 🎯 Core (Phase 1-2) ✅
+- **🔍 Auto-detect errors** in your terminal (Python, JavaScript, TypeScript, Go, Rust)
+- **📝 Smart capture** - Only saves bugs that took real debugging (>2 min), not typos
+- **⏱️ Time tracking** - Know how long each bug took to fix
+- **👆 Manual override** - Press `Cmd+Shift+D` to force-save any bug
+- **🔗 Git integration** - Captures commit hash, diffs, and file changes
+
+### 🧠 AI-Powered (Phase 3) ✅ **NEW!**
+- **🤖 Local LLM analysis** - Powered by Ollama (qwen2.5-coder:3b)
+- **📊 Root cause analysis** - AI explains what went wrong
+- **💡 Key learnings** - Extracts best practices from your fixes
+- **🔍 Semantic search** - Find similar bugs: "Show me null pointer issues"
+- **📝 Auto-generated reports** - Beautiful markdown with insights
+- **🗃️ Vector database** - LanceDB stores 768-dim embeddings for search
+
+### 🎬 Coming Soon (Phase 4-5)
+- Timeline UI with interactive bug browser
+- Pattern analysis: "You often forget to check for null"
+- Weekly summaries of your debugging sessions
+- Export to PDF/Notion/Lineary (coming soon)
 
 ---
 
