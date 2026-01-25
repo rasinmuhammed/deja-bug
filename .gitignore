@@ -1,0 +1,37 @@
+# VS Code Extension
+extension/node_modules/
+extension/dist/
+extension/out/
+*.vsix
+
+# Python
+server/.venv/
+server/__pycache__/
+server/**/__pycache__/
+server/*.pyc
+server/.pytest_cache/
+server/.mypy_cache/
+server/.ruff_cache/
+
+# Deja-Bug Data (user's personal debugging data)
+.deja-bug/bugs/
+.deja-bug/vector.db/
+.deja-bug/stats.json
+
+# Keep config template
+!.deja-bug/config.example.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*

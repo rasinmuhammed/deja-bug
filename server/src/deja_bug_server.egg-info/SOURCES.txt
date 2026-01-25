@@ -1,0 +1,10 @@
+README.md
+pyproject.toml
+src/deja_bug/__init__.py
+src/deja_bug/__main__.py
+src/deja_bug/server.py
+src/deja_bug_server.egg-info/PKG-INFO
+src/deja_bug_server.egg-info/SOURCES.txt
+src/deja_bug_server.egg-info/dependency_links.txt
+src/deja_bug_server.egg-info/requires.txt
+src/deja_bug_server.egg-info/top_level.txt

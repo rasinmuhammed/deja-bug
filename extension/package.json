@@ -1,0 +1,130 @@
+{
+  "name": "deja-bug",
+  "displayName": "Deja-Bug: AI Debugging Journal",
+  "description": "Turn your debugging sessions into AI-powered learning. Automatically captures bugs, analyzes patterns, and builds a searchable knowledge base—100% local, privacy-first.",
+  "version": "0.1.0",
+  "publisher": "muhammedrasin",
+  "icon": "assets/icon.png",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Machine Learning",
+    "Education",
+    "Other"
+  ],
+  "keywords": [
+    "debugging",
+    "ai",
+    "machine learning",
+    "local llm",
+    "error tracking",
+    "development journal",
+    "bug tracking",
+    "ollama",
+    "privacy"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rasinmuhammed/deja-bug"
+  },
+  "bugs": {
+    "url": "https://github.com/rasinmuhammed/deja-bug/issues"
+  },
+  "homepage": "https://github.com/rasinmuhammed/deja-bug#readme",
+  "license": "MIT",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "enabledApiProposals": [
+    "terminalDataWriteEvent"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "deja-bug.showTimeline",
+        "title": "Deja-Bug: Show Bug Timeline"
+      },
+      {
+        "command": "deja-bug.searchBugs",
+        "title": "Deja-Bug: Search Past Bugs"
+      },
+      {
+        "command": "deja-bug.manualCapture",
+        "title": "Deja-Bug: Capture This Bug"
+      },
+      {
+        "command": "deja-bug.restartServer",
+        "title": "Deja-Bug: Restart MCP Server"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "deja-bug.manualCapture",
+        "key": "cmd+shift+d",
+        "when": "terminalFocus"
+      }
+    ],
+    "configuration": {
+      "title": "Deja-Bug",
+      "properties": {
+        "deja-bug.autoCapture": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically capture terminal errors"
+        },
+        "deja-bug.captureMode": {
+          "type": "string",
+          "enum": [
+            "off",
+            "manual",
+            "smart",
+            "everything"
+          ],
+          "default": "smart",
+          "description": "Capture mode: off (disabled), manual (only via command), smart (time-based filter), everything (all errors)"
+        },
+        "deja-bug.minResolutionTime": {
+          "type": "number",
+          "default": 120,
+          "minimum": 0,
+          "description": "Minimum time (in seconds) between error and fix to auto-capture. Filters out quick syntax fixes."
+        },
+        "deja-bug.confidenceThreshold": {
+          "type": "number",
+          "default": 0.5,
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Minimum confidence score (0-1) to auto-capture a bug"
+        },
+        "deja-bug.bufferSize": {
+          "type": "number",
+          "default": 200,
+          "description": "Number of terminal lines to buffer for context"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "pnpm run package",
+    "compile": "esbuild src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap",
+    "watch": "pnpm run compile -- --watch",
+    "package": "pnpm run compile -- --minify",
+    "test": "vitest",
+    "lint": "eslint src --ext ts",
+    "format": "prettier --write 'src/**/*.ts'"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "esbuild": "^0.20.0",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.4",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.0"
+  },
+  "dependencies": {}
+}
