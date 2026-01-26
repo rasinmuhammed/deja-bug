@@ -6,12 +6,14 @@ import { LLMManager } from './llm/manager';
 import { DejaBugStatusBar } from './ui/status-bar';
 import { showWelcomeWalkthrough } from './ui/welcome';
 import { AchievementManager } from './achievements/manager';
+import { PatternDetector } from './insights/detector';
 
 let mcpClient: MCPClient | undefined;
 let llmManager: LLMManager | undefined;
 let terminalMonitor: TerminalMonitor | undefined;
 let statusBar: DejaBugStatusBar | undefined;
 let achievementManager: AchievementManager | undefined;
+let patternDetector: PatternDetector | undefined;
 
 export async function activate(context: vscode.ExtensionContext) {
     console.log('Deja-Bug extension is now active!');
@@ -52,10 +54,13 @@ export async function activate(context: vscode.ExtensionContext) {
         statusBar.setLLMProvider('None (Disabled)');
     }
 
+    // Initialize pattern detector
+    patternDetector = new PatternDetector(context, mcpClient);
+
     // Initialize terminal monitor (pass LLM manager)
     terminalMonitor = new TerminalMonitor(mcpClient, llmManager, statusBar, context);
 
-    // Check achievements periodically
+    // Check achievements & patterns periodically
     setInterval(async () => {
         try {
             const stats = await mcpClient?.callTool('get_stats', {});
@@ -65,16 +70,33 @@ export async function activate(context: vscode.ExtensionContext) {
                     ...stats
                 });
             }
+            
+            // Check for patterns every 5 minutes
+            if (patternDetector) {
+                await patternDetector.checkPatterns();
+            }
         } catch {
             // Silently fail if MCP not available
         }
     }, 30000); // Check every 30 seconds
 
+    // Check for monthly insights on first of month
+    const lastInsightsCheck = context.globalState.get('lastInsightsMonth', 0);
+    const currentMonth = new Date().getMonth();
+    if (lastInsightsCheck !== currentMonth && statusBar.getBugCount() >= 10) {
+        setTimeout(async () => {
+            if (patternDetector) {
+                await patternDetector.generateMonthlyInsights();
+                context.globalState.update('lastInsightsMonth', currentMonth);
+            }
+        }, 5000); // Delay to not interrupt startup
+    }
+
     // Register commands
     const captureCommand = vscode.commands.registerCommand('deja-bug.manualCapture', async () => {
         await terminalMonitor?.manualCapture();
         
-        // Check for achievements after capture
+        // Check for achievements & patterns after capture
         setTimeout(async () => {
             try {
                 const stats = await mcpClient?.callTool('get_stats', {});
@@ -84,12 +106,28 @@ export async function activate(context: vscode.ExtensionContext) {
                         ...stats
                     });
                 }
+                
+                if (patternDetector) {
+                    await patternDetector.checkPatterns();
+                }
             } catch {}
         }, 1000);
     });
 
     const timelineCommand = vscode.commands.registerCommand('deja-bug.showTimeline', () => {
-        BugTimelinePanel.createOrShow(context.extensionUri);
+        BugTimelinePanel.createOrShow(context.extensionUri, mcpClient);
+    });
+
+    const patternsCommand = vscode.commands.registerCommand('deja-bug.showPatterns', async () => {
+        if (patternDetector) {
+            await patternDetector.showPatternsPanel();
+        }
+    });
+
+    const insightsCommand = vscode.commands.registerCommand('deja-bug.showInsights', async () => {
+        if (patternDetector) {
+            await patternDetector.generateMonthlyInsights();
+        }
     });
 
     const searchCommand = vscode.commands.registerCommand('deja-bug.searchBugs', async (query?: string) => {
@@ -98,8 +136,18 @@ export async function activate(context: vscode.ExtensionContext) {
             placeHolder: 'e.g., "null pointer error"'
         });
 
-        if (query && terminalMonitor) {
-            vscode.window.showInformationMessage('Semantic search feature available!');
+        if (query && mcpClient) {
+            try {
+                const results = await mcpClient.callTool('search_similar_bugs', { query, k: 5 });
+                if (results?.results?.length > 0) {
+                    vscode.window.showInformationMessage(
+                        `Found ${results.count} similar bugs!`,
+                        'View Results'
+                    );
+                } else {
+                    vscode.window.showInformationMessage('No similar bugs found');
+                }
+            } catch {}
         }
     });
 
@@ -122,8 +170,11 @@ export async function activate(context: vscode.ExtensionContext) {
         terminalMonitor,
         statusBar,
         achievementManager,
+        patternDetector,
         captureCommand,
         timelineCommand,
+        patternsCommand,
+        insightsCommand,
         searchCommand,
         restartCommand
     );
@@ -146,5 +197,6 @@ export function deactivate() {
     llmManager?.dispose();
     statusBar?.dispose();
     achievementManager?.dispose();
+    patternDetector?.dispose();
     mcpClient?.dispose();
 }

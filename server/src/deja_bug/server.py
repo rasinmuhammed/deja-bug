@@ -33,6 +33,10 @@ llm_tools.init_tools(mcp, ollama_client, vector_store, active_incidents, lambda 
 from . import timeline_tools
 timeline_tools.register_timeline_tools(mcp, vector_store, lambda msg: print(f"[MCP] {msg}", file=sys.stderr))
 
+# Register pattern detection tools
+from . import patterns
+patterns.register_pattern_tools(mcp, vector_store, ollama_client, lambda msg: print(f"[MCP] {msg}", file=sys.stderr))
+
 
 class IncidentCapture(BaseModel):
     """Data captured when an error is detected"""
