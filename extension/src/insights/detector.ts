@@ -425,7 +425,7 @@ export class PatternDetector {
     }
 
     private log(message: string): void {
-        this.output Channel.appendLine(`[${new Date().toISOString()}] ${message}`);
+        this.outputChannel.appendLine(`[${new Date().toISOString()}] ${message}`);
     }
 
     dispose() {
