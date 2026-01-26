@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 
 /**
  * Welcome walkthrough shown on first run
+ * Designer-level UI with professional color palette
  */
 export async function showWelcomeWalkthrough(context: vscode.ExtensionContext): Promise<void> {
     // Check if already seen
@@ -21,9 +22,6 @@ export async function showWelcomeWalkthrough(context: vscode.ExtensionContext): 
     // Handle messages
     panel.webview.onDidReceiveMessage(async message => {
         switch (message.command) {
-            case 'installOllama':
-                vscode.env.openExternal(vscode.Uri.parse('https://ollama.com/download'));
-                break;
             case 'getStarted':
                 context.globalState.update('hasSeenWelcome', true);
                 panel.dispose();
@@ -46,213 +44,405 @@ function getWelcomeHTML(): string {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Deja-Bug</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,600&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
+        :root {
+            --cream: #EEE8DF;
+            --beige: #C4BCB0;
+            --deep-ocean: #2C365A;
+            --ocean-light: #3d4a6e;
+            --text-primary: #1a1a1a;
+            --text-secondary: #5a5a5a;
+        }
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 60px 40px;
-            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--cream);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+            overflow-x: hidden;
         }
-
+        
         .container {
-            max-width: 700px;
+            max-width: 900px;
             margin: 0 auto;
+            padding: 60px 40px;
+            animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+        
+        .logo {
+            font-size: 72px;
+            margin-bottom: 24px;
+            display: inline-block;
+            animation: bounce 3s ease-in-out infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-15px) rotate(-3deg); }
+            75% { transform: translateY(-10px) rotate(3deg); }
+        }
+        
         h1 {
-            font-size: 48px;
+            font-family: 'Fraunces', serif;
+            font-size: 56px;
+            font-weight: 600;
+            color: var(--deep-ocean);
             margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px
+            letter-spacing: -0.03em;
+            line-height: 1.1;
         }
-
+        
         .subtitle {
-            font-size: 24px;
-            opacity: 0.9;
-            margin-bottom: 50px;
+            font-size: 20px;
+            color: var(--text-secondary);
+            font-weight: 400;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.5;
         }
-
+        
+        /* Feature Grid */
         .features {
             display: grid;
-            gap: 20px;
-            margin: 40px 0;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+            margin-bottom: 70px;
         }
-
+        
         .feature {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 25px;
-            border-radius: 12px;
-            border-left: 4px solid rgba(255, 255, 255, 0.5);
+            background: white;
+            border-radius: 20px;
+            padding: 36px 32px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
         }
-
-        .feature-title {
-            font-size: 20px;
+        
+        .feature::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--deep-ocean);
+            transform: translateX(-100%);
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .feature:hover::before {
+            transform: translateX(0);
+        }
+        
+        .feature:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(44, 54, 90, 0.15);
+            border-color: var(--beige);
+        }
+        
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 24px;
+            display: block;
+            filter: grayscale(0.2);
+        }
+        
+        .feature h3 {
+            font-size: 22px;
             font-weight: 600;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            color: var(--deep-ocean);
+            margin-bottom: 14px;
+            letter-spacing: -0.01em;
         }
-
-        .feature-desc {
-            opacity: 0.9;
-            line-height: 1.6;
+        
+        .feature p {
+            color: var(--text-secondary);
+            font-size: 15px;
+            line-height: 1.7;
         }
-
+        
+        /* Shortcuts Section */
         .shortcuts {
-            background: rgba(255, 255, 255, 0.15);
-            padding: 30px;
-            border-radius: 12px;
-            margin: 30px 0;
+            background: var(--deep-ocean);
+            color: white;
+            border-radius: 24px;
+            padding: 48px 44px;
+            margin-bottom: 50px;
+            position: relative;
+            overflow: hidden;
         }
-
+        
+        .shortcuts::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        
+        .shortcuts h2 {
+            font-family: 'Fraunces', serif;
+            font-size: 32px;
+            margin-bottom: 32px;
+            font-weight: 600;
+            position: relative;
+        }
+        
+        .shortcut-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            position: relative;
+        }
+        
         .shortcut {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            gap: 20px;
+            padding: 20px 24px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-
-        .shortcut:last-child {
-            border-bottom: none;
+        
+        .shortcut:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateX(4px);
+            border-color: rgba(255, 255, 255, 0.2);
         }
-
-        .key {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-family: monospace;
+        
+        .shortcut-key {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+            font-size: 13px;
             font-weight: 600;
+            white-space: nowrap;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
-
+        
+        .shortcut-desc {
+            font-size: 15px;
+            opacity: 0.95;
+            line-height: 1.4;
+        }
+        
+        /* Actions */
         .actions {
             display: flex;
-            gap: 15px;
-            margin-top: 40px;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
-
-        button {
-            flex: 1;
-            padding: 16px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
+        
+        .btn {
+            font-family: 'Inter', sans-serif;
+            font-size: 17px;
             font-weight: 600;
+            padding: 18px 40px;
+            border-radius: 14px;
+            border: none;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            letter-spacing: -0.01em;
         }
-
-        .primary {
-            background: white;
-            color: #667eea;
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
         }
-
-        .secondary {
-            background: rgba(255, 255, 255, 0.2);
+        
+        .btn:active::before {
+            width: 400px;
+            height: 400px;
+            transition: width 0s, height 0s;
+        }
+        
+        .btn-primary {
+            background: var(--deep-ocean);
             color: white;
+            box-shadow: 0 8px 24px rgba(44, 54, 90, 0.25);
         }
-
-        button:hover {
+        
+        .btn-primary:hover {
+            background: var(--ocean-light);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(44, 54, 90, 0.35);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--deep-ocean);
+            border: 2px solid var(--beige);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--beige);
+            border-color: var(--beige);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 6px 20px rgba(196, 188, 176, 0.3);
         }
-
-        button:active {
-            transform: translateY(0);
+        
+        .btn span {
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 70px;
+            padding-top: 50px;
+            border-top: 2px solid var(--beige);
+            color: var(--text-secondary);
+            font-size: 15px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 40px 24px;
+            }
+            
+            h1 {
+                font-size: 40px;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .shortcuts {
+                padding: 36px 28px;
+            }
+            
+            .shortcut-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .actions {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>
-            <span>🐛</span>
-            <span>Welcome to Deja-Bug!</span>
-        </h1>
+        <div class="header">
+            <div class="logo">🐛</div>
+            <h1>Welcome to Deja-Bug</h1>
+            <p class="subtitle">Your AI debugging journal that learns from YOUR bugs and makes you a better developer</p>
+        </div>
         
-        <p class="subtitle">
-            Your AI-powered debugging journal is ready
-        </p>
-
         <div class="features">
             <div class="feature">
-                <div class="feature-title">
-                    <span>🎯</span>
-                    <span>Auto-Detect Errors</span>
-                </div>
-                <p class="feature-desc">
-                    Deja-Bug automatically watches your terminal for errors. No setup needed!
-                </p>
+                <span class="feature-icon">🎯</span>
+                <h3>Auto-Detect Errors</h3>
+                <p>Watches your terminal and automatically captures bugs the moment they happen. Zero setup required.</p>
             </div>
-
-            <div class="feature">
-                <div class="feature-title">
-                    <span>🧠</span>
-                    <span>AI Analysis</span>
-                </div>
-                <p class="feature-desc">
-                    Local LLM analyzes your fixes and extracts key learnings. Works with Cursor, Copilot, or Ollama.
-                </p>
-            </div>
-
-            <div class="feature">
-                <div class="feature-title">
-                    <span>🔍</span>
-                    <span>Semantic Search</span>
-                </div>
-                <p class="feature-desc">
-                    Find similar bugs you've fixed before using vector-based search.
-                </p>
-            </div>
-
-            <div class="feature">
-                <div class="feature-title">
-                    <span>🔐</span>
-                    <span>100% Private</span>
-                </div>
-                <p class="feature-desc">
-                    Everything runs locally. Your code never leaves your machine.
-                </p>
-            </div>
-        </div>
-
-        <div class="shortcuts">
-            <h3 style="margin-bottom: 20px;">⌨️ Keyboard Shortcuts</h3>
             
-            <div class="shortcut">
-                <span>Force capture current bug</span>
-                <span class="key">Cmd + Shift + D</span>
+            <div class="feature">
+                <span class="feature-icon">🧠</span>
+                <h3>AI Analysis</h3>
+                <p>Uses Cursor AI, Copilot, or Ollama to analyze root causes and extract learnings from your fixes.</p>
             </div>
-
-            <div class="shortcut">
-                <span>View bug timeline</span>
-                <span class="key">Cmd + Shift + P → Timeline</span>
+            
+            <div class="feature">
+                <span class="feature-icon">🔍</span>
+                <h3>Pattern Detection</h3>
+                <p>Learns YOUR patterns and warns you: "You've fixed this 3 times before!"</p>
             </div>
-
-            <div class="shortcut">
-                <span>Search past bugs</span>
-                <span class="key">Cmd + Shift + P → Search</span>
+            
+            <div class="feature">
+                <span class="feature-icon">🔐</span>
+                <h3>100% Private</h3>
+                <p>Everything runs locally. Your code never leaves your machine. No cloud, no tracking.</p>
             </div>
         </div>
-
+        
+        <div class="shortcuts">
+            <h2>⌨️ Keyboard Shortcuts</h2>
+            <div class="shortcut-list">
+                <div class="shortcut">
+                    <span class="shortcut-key">⌘⇧D</span>
+                    <span class="shortcut-desc">Force capture bug</span>
+                </div>
+                <div class="shortcut">
+                    <span class="shortcut-key">⌘⇧P</span>
+                    <span class="shortcut-desc">Show timeline</span>
+                </div>
+                <div class="shortcut">
+                    <span class="shortcut-key">⌘⇧P</span>
+                    <span class="shortcut-desc">View patterns</span>
+                </div>
+            </div>
+        </div>
+        
         <div class="actions">
-            <button class="primary" onclick="getStarted()">
-                🚀 Get Started
+            <button class="btn btn-primary" onclick="getStarted()">
+                <span>Get Started →</span>
             </button>
-            <button class="secondary" onclick="skip()">
-                Skip Tour
+            <button class="btn btn-secondary" onclick="skip()">
+                <span>Skip for now</span>
             </button>
+        </div>
+        
+        <div class="footer">
+            <p>Built with ❤️ for developers who want to learn from every bug</p>
         </div>
     </div>
-
+    
     <script>
         const vscode = acquireVsCodeApi();
         
