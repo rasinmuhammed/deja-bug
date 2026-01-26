@@ -29,6 +29,10 @@ incident_counter = 0
 from . import llm_tools
 llm_tools.init_tools(mcp, ollama_client, vector_store, active_incidents, lambda msg: print(f"[MCP] {msg}", file=sys.stderr))
 
+# Register timeline tools
+from . import timeline_tools
+timeline_tools.register_timeline_tools(mcp, vector_store, lambda msg: print(f"[MCP] {msg}", file=sys.stderr))
+
 
 class IncidentCapture(BaseModel):
     """Data captured when an error is detected"""

@@ -58,7 +58,7 @@ def init_tools(mcp, ollama_client, vector_store, active_incidents, log):
                 log(f"✅ Bug {bug_id} stored in vector database")
             
             # 4. Generate markdown report
-            from ..reports import generate_markdown_report, save_markdown_report, update_timeline_index
+            from deja_bug.reports import generate_markdown_report, save_markdown_report, update_timeline_index
             
             markdown = generate_markdown_report(
                 bug_id=bug_id,

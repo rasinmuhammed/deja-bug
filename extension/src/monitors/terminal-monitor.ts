@@ -2,6 +2,9 @@ import * as vscode from 'vscode';
 import { CircularBuffer } from '../utils/circular-buffer';
 import { detectError, extractFilePaths } from '../utils/error-patterns';
 import { MCPClient } from '../mcp/client';
+import { LLMManager } from '../llm/manager';
+import { DejaBugStatusBar } from '../ui/status-bar';
+import { showBugAnalyzed } from '../ui/notifications';
 
 interface TerminalState {
     buffer: CircularBuffer;
@@ -18,7 +21,12 @@ export class TerminalMonitor implements vscode.Disposable {
     private disposables: vscode.Disposable[] = [];
     private outputChannel: vscode.OutputChannel;
 
-    constructor(private mcpClient: MCPClient) {
+    constructor(
+        private mcpClient: MCPClient,
+        private llmManager: LLMManager,
+        private statusBar: DejaBugStatusBar,
+        private context: vscode.ExtensionContext
+    ) {
         this.outputChannel = vscode.window.createOutputChannel('Deja-Bug Monitor');
 
         const config = vscode.workspace.getConfiguration('deja-bug');
@@ -269,6 +277,16 @@ export class TerminalMonitor implements vscode.Disposable {
             manual_capture: true  // Override automatic filters
           });
 
+          // Trigger AI analysis
+          if (result?.status === 'captured' && result.bug_id) {
+            this.log(`🧠 Triggering AI analysis for ${result.bug_id}...`);
+            this.analyzeBugWithLLM(
+              result.bug_id,
+              state,
+              diff
+            );
+          }
+
           state.activeIncident = null;
           state.incidentStartTime = null;
 
@@ -298,36 +316,62 @@ export class TerminalMonitor implements vscode.Disposable {
         try {
             this.log(`🧠 Triggering LLM analysis for ${bugId}...`);
             
-            const errorLog = state.buffer.getAll();
+            const errorLog = state.buffer.getAll().join('\n');
             const timeToFix = state.incidentStartTime 
                 ? Math.floor((Date.now() - state.incidentStartTime) / 1000)
                 : 0;
-            
-            // Call analyze_bug tool
-            const analysis = await this.mcpClient.callTool('analyze_bug', {
-                bug_id: bugId,
-                error_log: errorLog,
-                git_diff: gitDiff,
-                time_to_fix: timeToFix,
-                modified_files: [] //TODO: Extract from git diff
-            });
-            
-            if (analysis?.status === 'analyzed') {
-                const summary = analysis.summary;
-                this.log(`✅ AI Analysis complete: ${summary.root_cause?.substring(0, 50)}...`);
-                
-                // Show rich notification with summary
-                vscode.window.showInformationMessage(
-                    `🧠 ${summary.root_cause?.substring(0, 80)}...`,
-                    'View Full Report', 'Search Similar'
-                ).then(selection => {
-                    if (selection === 'Search Similar') {
-                        this.searchSimilarBugs(summary.root_cause);
+
+            // Show progress notification
+            await vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                title: "🧠 Analyzing Bug with AI...",
+                cancellable: false
+            }, async (progress) => {
+                progress.report({ increment: 0, message: "Generating summary..." });
+
+                // Use LLM manager (supports Cursor/Copilot/Ollama)
+                const summary = await this.llmManager.analyze(errorLog, gitDiff, timeToFix);
+
+                if (!summary) {
+                    this.log('⚠️ LLM analysis failed or unavailable');
+                    return;
+                }
+
+                progress.report({ increment: 50, message: "Storing insights..." });
+
+                // Store in MCP if Ollama is active (has vector DB)
+                if (this.llmManager.getProviderInfo()?.name === 'ollama') {
+                    try {
+                        await this.mcpClient.callTool('analyze_bug', {
+                            bug_id: bugId,
+                            error_log: errorLog,
+                            git_diff: gitDiff,
+                            time_to_fix: timeToFix,
+                            modified_files: []
+                        });
+                    } catch (error) {
+                        this.log(`Vector storage failed: ${error}`);
                     }
-                });
-            }
+                }
+
+                progress.report({ increment: 100, message: "Complete!" });
+
+                // Update status bar
+                this.statusBar.onBugCaptured();
+                
+                // Save bug count
+                this.context.globalState.update('totalBugs', this.statusBar.getBugCount());
+
+                // Show rich notification
+                const reportPath = `${process.env.HOME}/.deja-bug/bugs/${bugId}.md`;
+                await showBugAnalyzed(bugId, summary, reportPath);
+
+                this.log(`✅ AI Analysis complete: ${summary.root_cause.substring(0, 50)}...`);
+            });
+
         } catch (error) {
-            this.log(`❌ Error analyzing bug: ${error}`);
+            this.log(`❌ Error in LLM analysis: ${error}`);
+            vscode.window.showErrorMessage(`AI analysis failed: ${error}`);
         }
     }
     
