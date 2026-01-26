@@ -1,8 +1,8 @@
 {
   "name": "deja-bug",
-  "displayName": "Deja-Bug: AI Debugging Journal",
-  "description": "Turn your debugging sessions into AI-powered learning. Automatically captures bugs, analyzes patterns, and builds a searchable knowledge base—100% local, privacy-first.",
-  "version": "0.1.0",
+  "displayName": "Deja-Bug",
+  "description": "Your AI debugging journal that learns from YOUR bugs. Capture errors, analyze with local AI, detect patterns, and become a better developer—100% private.",
+  "version": "1.0.0",
   "publisher": "muhammedrasin",
   "icon": "assets/icon.png",
   "engines": {
@@ -10,28 +10,31 @@
   },
   "categories": [
     "Machine Learning",
-    "Education",
-    "Other"
+    "Other",
+    "Programming Languages",
+    "Snippets"
   ],
   "keywords": [
     "debugging",
     "ai",
-    "machine learning",
-    "local llm",
-    "error tracking",
-    "development journal",
-    "bug tracking",
+    "learning",
+    "patterns",
+    "errors",
+    "llm",
+    "cursor",
+    "copilot",
     "ollama",
-    "privacy"
+    "terminal",
+    "bug-tracking"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/rasinmuhammed/deja-bug"
+    "url": "https://github.com/muhammedrasin/deja-bug"
   },
   "bugs": {
-    "url": "https://github.com/rasinmuhammed/deja-bug/issues"
+    "url": "https://github.com/muhammedrasin/deja-bug/issues"
   },
-  "homepage": "https://github.com/rasinmuhammed/deja-bug#readme",
+  "homepage": "https://github.com/muhammedrasin/deja-bug#readme",
   "license": "MIT",
   "activationEvents": [
     "onStartupFinished"
@@ -43,16 +46,29 @@
   "contributes": {
     "commands": [
       {
+        "command": "deja-bug.manualCapture",
+        "title": "Deja-Bug: Force Capture Current Bug",
+        "icon": "$(bug)"
+      },
+      {
         "command": "deja-bug.showTimeline",
-        "title": "Deja-Bug: Show Bug Timeline"
+        "title": "Deja-Bug: Show Timeline",
+        "icon": "$(history)"
+      },
+      {
+        "command": "deja-bug.showPatterns",
+        "title": "Deja-Bug: Show Debugging Patterns",
+        "icon": "$(graph)"
+      },
+      {
+        "command": "deja-bug.showInsights",
+        "title": "Deja-Bug: Generate Monthly Insights",
+        "icon": "$(lightbulb)"
       },
       {
         "command": "deja-bug.searchBugs",
-        "title": "Deja-Bug: Search Past Bugs"
-      },
-      {
-        "command": "deja-bug.captureManual",
-        "title": "Deja-Bug: Capture This Bug"
+        "title": "Deja-Bug: Search Past Bugs",
+        "icon": "$(search)"
       },
       {
         "command": "deja-bug.restartServer",
@@ -63,7 +79,9 @@
       {
         "command": "deja-bug.manualCapture",
         "key": "cmd+shift+d",
-        "when": "terminalFocus"
+        "mac": "cmd+shift+d",
+        "win": "ctrl+shift+d",
+        "linux": "ctrl+shift+d"
       }
     ],
     "configuration": {
