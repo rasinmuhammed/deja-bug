@@ -376,5 +376,3 @@ Deja-Bug isn't just a tool. It's a companion on your journey to becoming a bette
 ---
 
 **Happy Debugging! 🐛✨**
-
-*Questions? Join our [Discord](https://discord.gg/deja-bug) or reach out on [Twitter](https://twitter.com/deja-bug)*
