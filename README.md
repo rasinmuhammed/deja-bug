@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/rasinmuhammed-deja-bug-badge.png)](https://mseep.ai/app/rasinmuhammed-deja-bug)
+
 # 🐛 Deja-Bug
 
 > **Your debugging sessions, transformed into wisdom.**
